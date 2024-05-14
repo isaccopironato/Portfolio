@@ -1,9 +1,9 @@
 class Treenode:
 
     def __init__(self, data = None, parent = None) -> None:
-        self.data = data 
-        self.children = []
+        self.data = data
         self.parent = parent
+        self.children = []
 
     def find_node(self, node_data):
 
@@ -12,7 +12,8 @@ class Treenode:
         
         for node in self.children:
             n = node.find_node(node_data)
-            if n: return n
+            if n: 
+                return n
 
         return None
 
@@ -33,13 +34,14 @@ class Tree:
         parent_node = self.find_node(parent)
         
         if parent_node == None: 
-            raise Exception("No parent")
+            return "node not in tree"
         
         parent_node.children.append(Treenode(data, parent_node))
 
     def print_node(self, data):
-        print(str(self.find_node(data).data))
-        print(str(self.find_node(data).parent))
+        node = self.find_node(data)
+        print(node.data)
+        print(node.parent)
 
 
 tree = Tree()
