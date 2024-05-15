@@ -44,6 +44,7 @@ class Binarytree:
                
             if itr.data == data: 
                 return True
+            
             elif data > itr.data:
                 itr = itr.right
             else: 
