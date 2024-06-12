@@ -1,1 +1,1 @@
- itr.data == data:
+self.board[row][col] = "#"

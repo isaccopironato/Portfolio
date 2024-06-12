@@ -5,6 +5,7 @@ class Graphnode:
         self.conections = {}
 
 class graph:
+    
     def __init__(self) -> None:
         self.head = Graphnode()
 

@@ -1,0 +1,70 @@
+la lavola da sudoku forse era da rentere un oggetto?
+
+capire come farre l'applicazione 
+
+amount_of_mising_numbers(self)
+    - ritorna la quandita di caselle ancora da riempire nel sudoku
+
+###
+0. exit
+1. add num
+    - aggiunge un numeto dato dal user in iu indice dato dal user
+        - non so se fare in modo che se la casella e gia occupata l'user
+        non puo aggungere in quella casella 
+
+2. remove one number
+    - libera una casella indicata dal user
+
+? replace_num
+    - non so se aggiungere una fiture dove 
+    l'user puo cambiare numero a celta
+        - ovviamente solo da creare in caso add num viene modificato 
+
+###
+
+
+###
+3. check if corect
+    - returns bool 
+    splice_board()
+        - deve ritornare 2 matrix 
+            - uno per le colonne 
+            - uno per i quadrati 
+
+###
+
+###
+4. solve board
+    - deve fare un check se la tavola e correta per ora
+
+    - potenzialmente fare un loop che usa "ad one correct num".
+
+    - deve trovare la prima posizione libera poi trovare il row, column e box di quella posizione
+    unirli in un set e trovare il primo numero che amnca da 1-9
+
+    - il problema e che per ogni posizione che aggiungia anche se tecnicamente non e sbagliata al momento che la aggiungi
+    poi dopo puo essere sbagliata...
+
+    - puoi fare un loop brootforce che controlla tutti i possibili numeri che possono al momento andare in quella posizione chiamiamolo target...
+    poi confrontare il numeri uguali al target di box, row, colum per vedere se qualcuno di questi puo venire cambiato in un altro
+    cambiato quel numero torniamo al originale e mettiamo target li  
+
+    - dovresti trovare il metodo di trovare il numero che e al posto sbagliato 
+
+    - possibilita di inserire una tavola da risolvere...
+        - nel caso viene inserita una tavola che ha sicuramente una soluzione 
+        deve essere possibile dendere indelebili i numeri che gia sono nella tavola al
+        inizio del processo di soluzione
+        
+
+5. ad one correct num
+
+? ad one correct num at index
+
+###
+
+###
+6 print comands
+###
+
+
