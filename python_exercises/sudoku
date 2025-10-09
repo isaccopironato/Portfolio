@@ -1,0 +1,283 @@
+class sudoku: 
+    def __init__(self, board):
+        self.sudoku = [row[:] for row in board]  # Crea una copia profonda
+
+    def aggiungi_val(self, x, y, val):
+        self.sudoku[x-1][y-1] = val
+
+    def rimuovi_val(self, x, y):
+        self.sudoku[x-1][y-1] = "#"
+    
+    def ottieni_val(self, x, y):
+        return self.sudoku[x-1][y-1]
+
+class sudoku_game:
+
+    def __init__(self, sudoku):
+        self.sudoku_board = sudoku
+        self.original_sudoku = sudoku_game.copia_board(sudoku.sudoku)
+
+    @staticmethod
+    def copia_board(board):
+        return [row[:] for row in board]
+
+    # funzione per fare girare il gioco sudoku 
+    def gioca(self):
+        while True:
+            self.stampa_sudoku()
+            print("")
+            print("1. Aggiungi numero al sudoku")
+            print("2. Rimuovi numero dal sudoku")
+            print("3. Controlla se il sudoku è corretto")
+            print("4. Risolvi sudoku automaticamente")
+            print("5. Controlla se il sudoku è risolvibile")
+            print("6. Resetta al sudoku originale")
+            print("7. Esci")
+            print("")
+
+            try:
+                p = int(input("Comando: "))
+                
+                if p == 1:
+                    self.player_aggiungi_val()
+                elif p == 2:
+                    self.player_rimuovi_val()
+                elif p == 3: 
+                    self.controlla_se_risolto()
+                elif p == 4:
+                    if self.risolvi_sudoku():
+                        print("Sudoku risolto con successo!")
+                    else:
+                        print("Impossibile risolvere questo sudoku. Non ha soluzioni valide.")
+                elif p == 5:
+                    self.controlla_se_risolvibile()
+                elif p == 6:
+                    self.resetta_sudoku()
+                elif p == 7: 
+                    break
+                else: 
+                    print("Seleziona uno dei comandi disponibili (1-8)")
+            except ValueError:
+                print("Inserisci un numero valido")
+
+    # player aggiunge un numero a un indice 
+    def player_aggiungi_val(self):
+        try:
+            while True:
+                val = int(input("Inserisci valore (1-9): "))
+                if not self.controlla_se_nel_range(val):
+                    break
+                print("Il valore deve essere tra 1 e 9")
+
+            while True:
+                pos_x = int(input("Inserisci riga (1-9): "))
+                if not self.controlla_se_nel_range(pos_x):
+                    break
+                print("La riga deve essere tra 1 e 9")
+
+            while True:
+                pos_y = int(input("Inserisci colonna (1-9): "))
+                if not self.controlla_se_nel_range(pos_y):
+                    break
+                print("La colonna deve essere tra 1 e 9")
+
+            # Controlla se la posizione era già occupata nel sudoku originale
+            if self.original_sudoku[pos_x-1][pos_y-1] != "#":
+                print("Non puoi modificare i numeri del sudoku originale!")
+                return
+
+            # Controlla se la posizione è valida prima di inserire
+            if self.e_mossa_valida(pos_x-1, pos_y-1, val):
+                self.sudoku_board.aggiungi_val(pos_x, pos_y, val)
+                print(f"Numero {val} inserito in posizione ({pos_x}, {pos_y})")
+            else:
+                print("Mossa non valida! Il numero viola le regole del Sudoku.")
+                
+        except ValueError:
+            print("Inserisci solo numeri validi")
+
+    def player_rimuovi_val(self):
+        try:
+            while True:
+                pos_x = int(input("Inserisci riga da cui rimuovere (1-9): "))
+                if not self.controlla_se_nel_range(pos_x):
+                    break
+                print("La riga deve essere tra 1 e 9")
+
+            while True:
+                pos_y = int(input("Inserisci colonna da cui rimuovere (1-9): "))
+                if not self.controlla_se_nel_range(pos_y):
+                    break
+                print("La colonna deve essere tra 1 e 9")
+
+            # Controlla se la posizione era già occupata nel sudoku originale
+            if self.original_sudoku[pos_x-1][pos_y-1] != "#":
+                print("Non puoi rimuovere i numeri del sudoku originale!")
+                return
+
+            self.sudoku_board.rimuovi_val(pos_x, pos_y)
+            print(f"Numero rimosso dalla posizione ({pos_x}, {pos_y})")
+            
+        except ValueError:
+            print("Inserisci solo numeri validi")
+
+    # guardare se il numero è compatibile con i valori e gli indici della tabella sudoku
+    def controlla_se_nel_range(self, val):
+        return val not in range(1, 10)
+
+    # controlla riga 
+    def controlla_riga(self, row):
+        temp_row = []
+        for j in range(9):
+            if self.sudoku_board.sudoku[row][j] != "#":
+                temp_row.append(self.sudoku_board.sudoku[row][j])
+        
+        return len(temp_row) == len(set(temp_row))
+
+    def controlla_colonna(self, col):
+        temp_col = []
+        for i in range(9):
+            if self.sudoku_board.sudoku[i][col] != "#":
+                temp_col.append(self.sudoku_board.sudoku[i][col])
+        
+        return len(temp_col) == len(set(temp_col))
+
+    def controlla_box(self, row, col):
+        # Trova l'angolo superiore sinistro del box 3x3
+        start_row = (row // 3) * 3
+        start_col = (col // 3) * 3
+        
+        temp_box = []
+        for i in range(start_row, start_row + 3):
+            for j in range(start_col, start_col + 3):
+                if self.sudoku_board.sudoku[i][j] != "#":
+                    temp_box.append(self.sudoku_board.sudoku[i][j])
+        
+        return len(temp_box) == len(set(temp_box))
+
+    def e_mossa_valida(self, row, col, val):
+        # Salva il valore originale
+        original = self.sudoku_board.sudoku[row][col]
+        
+        # Inserisci temporaneamente il valore
+        self.sudoku_board.sudoku[row][col] = val
+        
+        # Controlla se la mossa è valida
+        valid = (self.controlla_riga(row) and 
+                self.controlla_colonna(col) and 
+                self.controlla_box(row, col))
+        
+        # Ripristina il valore originale
+        self.sudoku_board.sudoku[row][col] = original
+        
+        return valid
+
+    def controlla_se_risolto(self):
+        # Prima controlla se ci sono ancora celle vuote
+        for i in range(9):
+            for j in range(9):
+                if self.sudoku_board.sudoku[i][j] == "#":
+                    print("Il sudoku non è ancora completo")
+                    return False
+
+        # Poi controlla se tutte le righe, colonne e box sono validi
+        for i in range(9):
+            if not self.controlla_riga(i):
+                print(f"Errore nella riga {i+1}")
+                return False
+            if not self.controlla_colonna(i): 
+                print(f"Errore nella colonna {i+1}")
+                return False
+        
+        # Controlla tutti i box 3x3
+        for i in range(0, 9, 3):
+            for j in range(0, 9, 3):
+                if not self.controlla_box(i, j):
+                    print(f"Errore nel box che inizia in ({i+1}, {j+1})")
+                    return False
+        
+        print("Congratulazioni! Il sudoku è risolto correttamente!")
+        return True
+
+    def trova_cella_vuota(self):
+        for i in range(9):
+            for j in range(9):
+                if self.sudoku_board.sudoku[i][j] == "#":
+                    return i, j
+        return None, None
+
+    def risolvi_sudoku(self):
+        row, col = self.trova_cella_vuota()
+        
+        # Se non ci sono celle vuote, il sudoku è risolto
+        if row is None:
+            return True
+        
+        # Prova numeri da 1 a 9
+        for num in range(1, 10):
+            if self.e_mossa_valida(row, col, num):
+                self.sudoku_board.sudoku[row][col] = num
+                
+                # Ricorsivamente risolvi il resto
+                if self.risolvi_sudoku():
+                    return True
+                
+                # Se non funziona, backtrack (solo se non era nel sudoku originale)
+                if self.original_sudoku[row][col] == "#":
+                    self.sudoku_board.sudoku[row][col] = "#"
+        
+        return False
+
+    def controlla_se_risolvibile(self):
+        # Crea una copia temporanea del sudoku per testare
+        temp_board = sudoku_game.copia_board(self.sudoku_board.sudoku)
+        temp_original = sudoku_game.copia_board(self.original_sudoku)
+        
+        # Crea un oggetto temporaneo per testare
+        temp_sudoku = sudoku(temp_board)
+        temp_game = sudoku_game(temp_sudoku)
+        temp_game.original_sudoku = temp_original
+        
+        # Prova a risolvere
+        if temp_game.risolvi_sudoku():
+            print("Il sudoku è risolvibile!")
+        else:
+            print("Il sudoku NON è risolvibile. Non ha soluzioni valide.")
+
+    # torna al sudoku caricato originariamente 
+    def resetta_sudoku(self):
+        self.sudoku_board.sudoku = sudoku_game.copia_board(self.original_sudoku)
+        print("Sudoku resettato allo stato originale")
+
+    # stampa il sudoku 
+    def stampa_sudoku(self):
+        print("    1 2 3 | 4 5 6 | 7 8 9 ")
+        print(" ---------------------------")
+        for i in range(len(self.sudoku_board.sudoku)):
+            print((i+1), end=" ")
+            for j in range(9):
+                if j % 3 == 0:
+                    print("|", end=" ") 
+                print(self.sudoku_board.sudoku[i][j], end=" ")
+            print("|")
+            if (i+1) % 3 == 0: 
+                print(" ---------------------------")
+
+
+# Sudoku di esempio
+my = [  [5, 3, "#", "#", 7, "#", "#", "#", "#"],
+        [6, "#", "#", 1, 9, 5, "#", "#", "#"],
+        ["#", 9, 8, "#", "#", "#", "#", 6, "#"],
+        [8, "#", "#", "#", 6, "#", "#", "#", 3],
+        [4, "#", "#", 8, "#", 3, "#", "#", 1],
+        [7, "#", "#", "#", 2, "#", "#", "#", 6],
+        ["#", 6, "#", "#", "#", "#", 2, 8, "#"],
+        ["#", "#", "#", 4, 1, 9, "#", "#", 5],
+        ["#", "#", "#", "#", 8, "#", "#", 7, 9]
+    ]
+
+# Avvia il gioco
+if __name__ == "__main__":
+    my_board = sudoku(my)
+    my_game = sudoku_game(my_board)
+    my_game.gioca()
